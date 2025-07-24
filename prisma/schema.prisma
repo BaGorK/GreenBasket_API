@@ -18,35 +18,36 @@ model User {
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
-  first_name                      String?
-  last_name                       String?
-  // incase users dont have an email address
-  email                           String
-  phone_number                    String                  @unique
-  password                        String
-  date_of_birth                   DateTime?
-  gender                          Gender?
-  profile_picture                 String?
-  role                            UserRole                @default(CUSTOMER)
-  status                          UserStatus              @default(ACTIVE)
-  authProvider                    AuthProvider            @default(EMAIL)
-  is_onboarding                   Boolean                 @default(true)
-  // this field is true when admin create a user. user should set his own password.
-  need_reset_password             Boolean                 @default(false)
-  idPhoto_front                   String?
-  idPhoto_back                    String?
-  verify_status                   UserAccountVerifyStatus @default(UNVERIFIED)
+  first_name          String?
+  last_name           String?
+  email               String
+  phone_number        String                  @unique
+  password            String
+  date_of_birth       DateTime?
+  gender              Gender?
+  profile_picture     String?
+  role                UserRole                @default(CUSTOMER)
+  status              UserStatus              @default(ACTIVE)
+  authProvider        AuthProvider            @default(EMAIL)
+  is_onboarding       Boolean                 @default(true)
+  need_reset_password Boolean                 @default(false)
+  idPhoto_front       String?
+  idPhoto_back        String?
+  verify_status       UserAccountVerifyStatus @default(UNVERIFIED)
+  verified_at         DateTime?
+
+  // Self-referencing: who verified this user (staff, support, or admin)
+  verifiedById String?
+  verifiedBy   User?   @relation("UserVerifiedBy", fields: [verifiedById], references: [id])
+  verified     User[]  @relation("UserVerifiedBy") // Users this user has verified
+
   reset_password_token            String?
   reset_password_token_expires_at DateTime?
 
-  // user may or may not be a vendor
-  vendor  Vendor?
-  // one user have one default addresses
-  address Address?
-
-  // one user may have many orders
+  // Relations
+  vendor   Vendor?
+  address  Address?
   orders   Order[]
-  // one user may have many orders
   cart     Cart[]
   Review   Review[]
   Wishlist Wishlist[]
@@ -137,6 +138,7 @@ model VendorBalance {
 
 model VendorTransaction {
   id        String   @id @default(uuid())
+  updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
   // Amount of the transaction
